@@ -1,0 +1,48 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug",
+      "type": "cppdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/bazel-bin/src/simulations/cfd_1d/linear_convection",
+      "args": [],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}",
+      "environment": [],
+      "externalConsole": false,
+      "MIMode": "gdb",
+      "miDebuggerPath": "/usr/bin/gdb",
+      "logging": {
+        "engineLogging": true,
+        "trace": true,
+        "traceResponse": true
+      }
+    },
+    {
+      "name": "Python: Debug Script with Args",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "./scripts/plot_csv.py",
+      "console": "integratedTerminal",
+      "args": ["${input:output}"],
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "target",
+      "type": "promptString",
+      "description": "Enter the Bazel build target (e.g., //path/to/your:target)",
+      "default": ""
+    },
+    {
+      "id": "output",
+      "type": "promptString",
+      "description": "Enter path to your output folder where csv files reside.",
+      "default": ""
+    }
+  ]
+}

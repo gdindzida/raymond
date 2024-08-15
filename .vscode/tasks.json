@@ -1,0 +1,43 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build.debug",
+      "type": "shell",
+      "command": "bazel",
+      "args": ["build", "${input:target}", "--compilation_mode=dbg"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Builds the specified Bazel target with debug options."
+    },
+    {
+      "label": "plot.csv",
+      "type": "shell",
+      "command": "python",
+      "args": ["./scripts/plot_csv.py", "${input:output}"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Builds the specified Bazel target with debug options."
+    }
+  ],
+  "inputs": [
+    {
+      "id": "target",
+      "type": "promptString",
+      "description": "Enter the Bazel build target (e.g., //path/to/your:target)",
+      "default": ""
+    },
+    {
+      "id": "output",
+      "type": "promptString",
+      "description": "Enter path to your output folder where csv files reside.",
+      "default": ""
+    }
+  ]
+}

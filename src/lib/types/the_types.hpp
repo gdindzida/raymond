@@ -7,7 +7,7 @@ namespace types {
 
 using floating_point_type = double;
 
-using vec3 = Vec3<floating_point_type>;
+using vec3 = geometry::Vec3<floating_point_type>;
 
 using point3 = vec3;
 

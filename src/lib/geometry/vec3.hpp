@@ -4,7 +4,7 @@
 #include <cmath>
 #include <iostream>
 
-namespace types {
+namespace geometry {
 
 template <typename T>
 class Vec3 {
@@ -99,6 +99,6 @@ inline Vec3<T> unit_vector(const Vec3<T>& v) {
     return v / v.length();
 }
 
-}  // namespace types
+}  // namespace geometry
 
 #endif  // VEC3_H

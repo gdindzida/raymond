@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "src/lib/types/color.hpp"
-#include "src/lib/types/the_types.hpp"
+#include "src/lib/image/color.hpp"
+#include "src/lib/math/my_math.hpp"
 
 int main() {
     int image_width = 256;
@@ -13,9 +13,9 @@ int main() {
         std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
             auto c =
-                types::color(double(i) / (image_width - 1), double(j) / (image_height - 1), 0.0);
+                image::color(double(i) / (image_width - 1), double(j) / (image_height - 1), 0.0);
 
-            types::write_color(std::cout, c);
+            image::write_color(std::cout, c);
         }
     }
 

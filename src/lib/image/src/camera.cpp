@@ -30,14 +30,20 @@ void Camera::initialize() {
     pixel_samples_scale_ = 1.0 / samples_per_pixel;
 
     // Camera
-    auto focal_length = F_ONE;
-    auto viewport_height = F_TWO;
+    auto theta = degrees_to_radians(vfov);
+    auto h = std::tan(theta / F_TWO);
+    auto viewport_height = F_TWO * h * focus_dist;
     auto viewport_width = viewport_height * (double(image_width) / image_height_);
-    camera_center_ = point3(F_ZERO, F_ZERO, F_ZERO);
+    camera_center_ = lookFrom;
+
+    // Calculate u, v, w
+    w_ = geometry::unit_vector(lookFrom - lookAt);
+    u_ = geometry::unit_vector(geometry::cross(vup, w_));
+    v_ = geometry::cross(w_, u_);
 
     // Viewport edges vectors
-    auto viewport_u = vec3(viewport_width, F_ZERO, F_ZERO);
-    auto viewport_v = vec3(F_ZERO, -viewport_height, F_ZERO);
+    auto viewport_u = viewport_width * u_;
+    auto viewport_v = viewport_height * (-v_);
 
     // Viewport delta vectors
     pixel_delta_u_ = viewport_u / double(image_width);
@@ -45,8 +51,12 @@ void Camera::initialize() {
 
     // Location of upper left pixel
     auto viewport_upper_left =
-        camera_center_ + vec3(F_ZERO, F_ZERO, -focal_length) - F_HALF * (viewport_u + viewport_v);
+        camera_center_ - (focus_dist * w_) - (viewport_u / F_TWO) - (viewport_v / F_TWO);
     pixel00_loc_ = viewport_upper_left + F_HALF * (pixel_delta_u_ + pixel_delta_v_);
+
+    auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / F_TWO));
+    defocus_disk_u_ = u_ * defocus_radius;
+    defocus_disk_v_ = v_ * defocus_radius;
 }
 
 Ray Camera::get_ray(int i, int j) const {
@@ -54,13 +64,19 @@ Ray Camera::get_ray(int i, int j) const {
     auto pixel_sample =
         pixel00_loc_ + ((i + offset.x()) * pixel_delta_u_) + ((j + offset.y()) * pixel_delta_v_);
 
-    auto ray_direction = pixel_sample - camera_center_;
+    auto ray_origin = (defocus_angle <= 0) ? camera_center_ : defocus_disk_sample();
+    auto ray_direction = pixel_sample - ray_origin;
 
-    return Ray(camera_center_, ray_direction);
+    return Ray(ray_origin, ray_direction);
 }
 
 Camera::vec3 Camera::sample_square() const {
     return vec3(random_number() - F_HALF, random_number() - F_HALF, F_ZERO);
+}
+
+Camera::point3 Camera::defocus_disk_sample() const {
+    auto p = geometry::random_vec3_in_unit_disk();
+    return camera_center_ + (p[0] * defocus_disk_u_) + (p[1] * defocus_disk_v_);
 }
 
 color Camera::ray_color(const Ray& r, int depth, const world::Hittable& world) {

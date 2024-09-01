@@ -27,3 +27,14 @@ cc_binary(
         "//src/lib/world",
     ],
 )
+
+cc_binary(
+    name = "raymond3",
+    srcs = ["raymond3.cpp"],
+    deps = [
+        "//src/lib/image",
+        "//src/lib/image:camera",
+        "//src/lib/math",
+        "//src/lib/world",
+    ],
+)

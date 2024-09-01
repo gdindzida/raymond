@@ -53,6 +53,14 @@ inline vec3 random_vec3(fp min, fp max) {
 }
 
 // TODO: optimize
+inline vec3 random_vec3_in_unit_disk() {
+    while (true) {
+        auto p = vec3(random_number(F_NEG_ONE, F_ONE), random_number(F_NEG_ONE, F_ONE), F_ZERO);
+        if (p.length2() < F_ONE) return p;
+    }
+}
+
+// TODO: optimize
 inline vec3 random_vec3_in_unit_sphere() {
     while (true) {
         auto p = random_vec3(F_NEG_ONE, F_ONE);

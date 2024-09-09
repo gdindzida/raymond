@@ -3,6 +3,8 @@ raytracer in a weekend*
 
 What next?
 
+How to run/debug/visualize.
+
 Solve todos.
 
 Move exported image in gui window instead of saving it.

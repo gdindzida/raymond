@@ -5,6 +5,8 @@ What next?
 
 Solve todos.
 
+Move exported image in gui window instead of saving it.
+
 Triangles — Most cool models are in triangle form. The model I/O is the worst and almost everybody tries to get somebody else’s code to do this. This also includes efficiently handling large meshes of triangles, which present their own challenges.
 
 Parallelism — Run N

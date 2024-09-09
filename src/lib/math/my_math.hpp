@@ -25,6 +25,10 @@ inline fp random_number() { return std::rand() / (RAND_MAX + F_ONE); }
 
 inline fp random_number(fp min, fp max) { return min + (max - min) * random_number(); }
 
+inline int32_t random_integer(int32_t min, int32_t max) {
+    return static_cast<int32_t>(random_number(min, max + 1));
+}
+
 }  // namespace my_math
 
 // Register namespace

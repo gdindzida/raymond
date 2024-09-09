@@ -20,11 +20,18 @@ class HittableList : public Hittable {
     HittableList(HittableList&& other) noexcept = delete;
     ~HittableList() = default;
 
+    HittableList& operator=(const HittableList&) = default;
+
     void clear();
 
     void add(std::shared_ptr<Hittable> object);
 
     bool hit(const image::Ray& r, geometry::Interval t, HitRecord& rec) const override;
+
+    const AABB& bounding_box() const noexcept override;
+
+   private:
+    AABB bbox_;
 };
 
 }  // namespace world

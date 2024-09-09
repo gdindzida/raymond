@@ -13,7 +13,12 @@ Interval::Interval() : min_(F_INF), max_(-F_INF) {}
 
 Interval::Interval(fp min, fp max) : min_(min), max_(max) {}
 
-fp Interval::size() const noexcept { return max_ - min_; }
+Interval::Interval(const Interval& a, const Interval& b) {
+    min_ = a.min() <= b.min() ? a.min() : b.min();
+    max_ = a.max() >= b.max() ? a.max() : b.max();
+}
+
+fp Interval::size() const noexcept { return std::abs(max_ - min_); }
 
 bool Interval::contains(fp& value) const noexcept { return min_ <= value && value <= max_; }
 
@@ -28,5 +33,13 @@ fp Interval::clamp(fp value) const noexcept {
     if (value > max_) return max_;
     return value;
 }
+
+Interval Interval::expand(fp delta) const noexcept {
+    auto padding = delta / F_TWO;
+    return Interval(min_ - padding, max_ + padding);
+}
+
+void Interval::set_max(const fp& new_max) noexcept { max_ = new_max; }
+void Interval::set_min(const fp& new_min) noexcept { min_ = new_min; }
 
 }  // namespace geometry

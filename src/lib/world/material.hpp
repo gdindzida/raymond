@@ -7,6 +7,7 @@
 #include "src/lib/math/my_math.hpp"
 #include "src/lib/world/hit_record.hpp"
 #include "src/lib/world/hittable.hpp"
+#include "src/lib/world/texture.hpp"
 
 namespace world {
 
@@ -18,15 +19,14 @@ class Material {
     virtual ~Material() = default;
 
     virtual bool scatter(const Ray& r_in, const HitRecord& record, color& attenuation,
-                         Ray& scattered) const {
-        return false;
-    }
+                         Ray& scattered) const = 0;
 };
 
 class Lambertian : public Material {
    public:
     Lambertian() = delete;
     Lambertian(const color& albedo);
+    Lambertian(std::shared_ptr<Texture> texture);
     Lambertian(const Lambertian& other) = default;
     Lambertian(Lambertian&& other) noexcept = default;
     ~Lambertian() = default;
@@ -35,7 +35,7 @@ class Lambertian : public Material {
                  Ray& scattered) const override;
 
    private:
-    color albedo_;
+    std::shared_ptr<Texture> texture_;
 };
 
 class Metal : public Material {

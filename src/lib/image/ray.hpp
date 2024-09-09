@@ -13,6 +13,7 @@ class Ray {
 
     Ray() = default;
     Ray(const point3& origin, const vec3& direction);
+    Ray(const point3& origin, const vec3& direction, const fp time);
     Ray(const Ray& other) = default;
     Ray(Ray&& other) noexcept = default;
     ~Ray() = default;
@@ -22,10 +23,12 @@ class Ray {
     const point3& origin() const noexcept;
     const vec3& direction() const noexcept;
     point3 at(fp t) const noexcept;
+    fp time() const noexcept;
 
    private:
     point3 o_;
     vec3 dir_;
+    fp time_;
 };
 
 }  // namespace image

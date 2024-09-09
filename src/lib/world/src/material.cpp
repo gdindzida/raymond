@@ -2,7 +2,9 @@
 
 namespace world {
 
-Lambertian::Lambertian(const color& albedo) : albedo_(albedo) {}
+Lambertian::Lambertian(const color& albedo) : texture_(std::make_shared<SolidColor>(albedo)) {}
+
+Lambertian::Lambertian(std::shared_ptr<Texture> texture) : texture_(texture) {}
 
 bool Lambertian::scatter(const Ray& r_in, const HitRecord& record, color& attenuation,
                          Ray& scattered) const {
@@ -10,8 +12,8 @@ bool Lambertian::scatter(const Ray& r_in, const HitRecord& record, color& attenu
 
     if (scatter_direction.near_zero()) scatter_direction = record.normal;
 
-    scattered = Ray(record.p, scatter_direction);
-    attenuation = albedo_;
+    scattered = Ray(record.p, scatter_direction, r_in.time());
+    attenuation = texture_->value(record.u, record.v, record.p);
     return true;
 }
 
@@ -21,7 +23,7 @@ bool Metal::scatter(const Ray& r_in, const HitRecord& record, color& attenuation
                     Ray& scattered) const {
     geometry::vec3 reflected = geometry::reflect(r_in.direction(), record.normal);
     reflected = geometry::unit_vector(reflected) + (fuzz_ * geometry::random_unit_vec3());
-    scattered = Ray(record.p, reflected);
+    scattered = Ray(record.p, reflected, r_in.time());
     attenuation = albedo_;
     return geometry::dot(scattered.direction(), record.normal) > 0;
 }
@@ -45,7 +47,7 @@ bool Dielectric::scatter(const Ray& r_in, const HitRecord& record, color& attenu
         direction = geometry::refract(unit_direction, record.normal, ri);
     }
 
-    scattered = image::Ray(record.p, direction);
+    scattered = image::Ray(record.p, direction, r_in.time());
     return true;
 }
 

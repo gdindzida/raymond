@@ -71,8 +71,8 @@ void bouncing_spheres() {
     image::Camera cam{};
     cam.aspect_ratio = 16.0 / 9.0;
     cam.image_width = 400;
-    cam.samples_per_pixel = 100;
-    cam.max_depth = 50;
+    cam.samples_per_pixel = 15;
+    cam.max_depth = 10;
     cam.vfov = 20;
     cam.lookFrom = point3(13, 2, 3);
     cam.lookAt = point3(0, 0, 0);

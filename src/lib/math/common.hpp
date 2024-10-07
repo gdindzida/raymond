@@ -52,23 +52,21 @@ inline vec3 random_vec3(fp min, fp max) {
     return vec3(random_number(min, max), random_number(min, max), random_number(min, max));
 }
 
-// TODO: optimize
 inline vec3 random_vec3_in_unit_disk() {
-    while (true) {
-        auto p = vec3(random_number(F_NEG_ONE, F_ONE), random_number(F_NEG_ONE, F_ONE), F_ZERO);
-        if (p.length2() < F_ONE) return p;
-    }
+    auto p = vec3(random_number(F_NEG_ONE, F_ONE), random_number(F_NEG_ONE, F_ONE), F_ZERO);
+    auto d = std::cbrt(random_number(F_ZERO, F_ONE));
+
+    return d * unit_vector(p);
 }
 
-// TODO: optimize
 inline vec3 random_vec3_in_unit_sphere() {
-    while (true) {
-        auto p = random_vec3(F_NEG_ONE, F_ONE);
-        if (p.length2() < F_ONE) return p;
-    }
+    auto p = random_vec3(F_NEG_ONE, F_ONE);
+    auto d = std::cbrt(random_number(F_ZERO, F_ONE));
+
+    return d * unit_vector(p);
 }
 
-inline vec3 random_unit_vec3() { return unit_vector(random_vec3_in_unit_sphere()); }
+inline vec3 random_unit_vec3() { return unit_vector(random_vec3(F_ZERO, F_ONE)); }
 
 inline vec3 random_on_hemisphere(const vec3& normal) {
     vec3 on_unit_sphere = random_unit_vec3();

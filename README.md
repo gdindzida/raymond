@@ -3,6 +3,8 @@ raytracer in a weekend*
 
 What next?
 
+Optimize memory location.
+
 How to run/debug/visualize.
 
 Solve todos.

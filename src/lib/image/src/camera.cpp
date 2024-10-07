@@ -15,7 +15,7 @@ void Camera::render(const world::Hittable& world) {
                 Ray r = get_ray(i, j);
                 pixel_color += ray_color(r, max_depth, world);
             }
-            write_color(std::cout, pixel_samples_scale_ * pixel_color);
+            // write_color(std::cout, pixel_samples_scale_ * pixel_color);
         }
     }
 

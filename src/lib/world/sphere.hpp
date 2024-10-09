@@ -13,7 +13,7 @@ namespace world {
 
 class Sphere : public Hittable {
    public:
-    Sphere() = delete;
+    Sphere() = default;
     Sphere(const geometry::point3& center, fp radius, std::shared_ptr<Material> material);
     Sphere(const geometry::point3& centerStart, const geometry::point3& centerEnd, fp radius,
            std::shared_ptr<Material> material);
@@ -21,7 +21,9 @@ class Sphere : public Hittable {
     Sphere(Sphere&& other) noexcept = default;
     ~Sphere() = default;
 
-    bool hit(const image::Ray& r, geometry::Interval t, HitRecord& record) const override;
+    Sphere& operator=(const Sphere& other) = default;
+
+    bool hit(const image::Ray& r, const geometry::Interval& t, HitRecord& record) const override;
 
     const AABB& bounding_box() const noexcept override;
 

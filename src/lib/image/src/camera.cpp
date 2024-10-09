@@ -1,5 +1,7 @@
 #include "src/lib/image/camera.hpp"
 
+#include "src/lib/multithreading/openmp.hpp"
+
 namespace image {
 
 void Camera::render(const world::Hittable& world) {
@@ -7,6 +9,7 @@ void Camera::render(const world::Hittable& world) {
 
     std::cout << "P3\n" << image_width << ' ' << image_height_ << "\n255\n";
 
+    OMP_PARALLEL_FOR_DYNAMIC
     for (int j = 0; j < image_height_; ++j) {
         std::clog << "\rScanlines remaining: " << (image_height_ - j) << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {

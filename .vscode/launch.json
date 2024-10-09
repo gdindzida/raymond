@@ -5,7 +5,7 @@
       "name": "Debug",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bazel-bin/src/app/weekend_2/raymond4",
+      "program": "${workspaceFolder}/bazel-bin/src/app/weekend_2/raymond5",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

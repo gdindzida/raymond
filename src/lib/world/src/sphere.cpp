@@ -21,7 +21,7 @@ Sphere::Sphere(const geometry::point3& centerStart, const geometry::point3& cent
     bbox_ = AABB(box1, box2);
 }
 
-bool Sphere::hit(const image::Ray& r, geometry::Interval t, HitRecord& record) const {
+bool Sphere::hit(const image::Ray& r, const geometry::Interval& t, HitRecord& record) const {
     const geometry::point3 current_center = center_.at(r.time());
     geometry::vec3 oc = current_center - r.origin();
     auto a = r.direction().length2();

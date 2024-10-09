@@ -19,10 +19,11 @@ class Hittable {
    public:
     virtual ~Hittable() = default;
 
-    virtual bool hit(const image::Ray& r, geometry::Interval t, HitRecord& record) const = 0;
+    virtual bool hit(const image::Ray& r, const geometry::Interval& t, HitRecord& record) const = 0;
 
     virtual const AABB& bounding_box() const noexcept = 0;
 };
+
 }  // namespace world
 
 #endif  // HITTABLE_HPP

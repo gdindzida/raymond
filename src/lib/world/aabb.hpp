@@ -24,7 +24,7 @@ class AABB {
 
     const geometry::Interval& operator[](const int32_t& index) const noexcept;
 
-    bool hit(const image::Ray r, geometry::Interval& ray_t) const noexcept;
+    bool hit(const image::Ray r, const geometry::Interval& ray_t) const noexcept;
 
     int32_t longest_axis() const noexcept;
 

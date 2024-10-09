@@ -27,9 +27,11 @@ const geometry::Interval& AABB::operator[](const int32_t& index) const noexcept 
     return intervals_[index];
 }
 
-bool AABB::hit(const image::Ray r, Interval& ray_t) const noexcept {
+bool AABB::hit(const image::Ray r, const Interval& ray_t) const noexcept {
     const point3& ray_origin = r.origin();
     const vec3& ray_direction = r.direction();
+
+    Interval temp = ray_t;
 
     for (int axis = 0; axis < 3; ++axis) {
         const Interval& ax = intervals_[axis];
@@ -40,14 +42,14 @@ bool AABB::hit(const image::Ray r, Interval& ray_t) const noexcept {
 
         // calculate overlap
         if (t0 < t1) {
-            if (t0 > ray_t.min()) ray_t.set_min(t0);
-            if (t1 < ray_t.max()) ray_t.set_max(t1);
+            if (t0 > temp.min()) temp.set_min(t0);
+            if (t1 < temp.max()) temp.set_max(t1);
         } else {
-            if (t1 > ray_t.min()) ray_t.set_min(t1);
-            if (t0 < ray_t.max()) ray_t.set_max(t0);
+            if (t1 > temp.min()) temp.set_min(t1);
+            if (t0 < temp.max()) temp.set_max(t0);
         }
 
-        if (ray_t.max() <= ray_t.min()) return false;
+        if (temp.max() <= temp.min()) return false;
     }
     return true;
 }

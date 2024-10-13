@@ -3,6 +3,7 @@
 #include <memory>
 #include <queue>
 
+#include "src/lib/gui/image_renderer.hpp"
 #include "src/lib/image/camera.hpp"
 #include "src/lib/math/common.hpp"
 #include "src/lib/math/my_math.hpp"
@@ -93,10 +94,12 @@ void bouncing_spheres() {
     cam.vup = vec3(0, 1, 0);
     cam.defocus_angle = 0.6;
     cam.focus_dist = 10.0;
+    cam.initialize();
 
     // Render
+    gui::ImageRenderer renderer{};
     auto start = std::chrono::high_resolution_clock::now();
-    cam.render(nodes[0]);
+    renderer.render(cam, &nodes[0]);
     auto end = std::chrono::high_resolution_clock::now();
 
     // Calculate the duration in milliseconds

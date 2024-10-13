@@ -29,7 +29,14 @@ class Camera {
     Camera(Camera&& other) noexcept = default;
     ~Camera() = default;
 
+    void initialize();
+
     void render(const world::Hittable& world);
+
+    image::color pixel_color(uint32_t u, uint32_t v, const world::Hittable* world) const;
+
+    int get_image_width() const;
+    int get_image_height() const;
 
    private:
     int image_height_;
@@ -42,15 +49,13 @@ class Camera {
     vec3 defocus_disk_u_;
     vec3 defocus_disk_v_;
 
-    void initialize();
-
     Ray get_ray(int i, int j) const;
 
     vec3 sample_square() const;
 
     point3 defocus_disk_sample() const;
 
-    color ray_color(const Ray& r, int depth, const world::Hittable& world);
+    color ray_color(const Ray& r, int depth, const world::Hittable& world) const;
 };
 
 }  // namespace image

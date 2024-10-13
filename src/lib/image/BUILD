@@ -22,8 +22,6 @@ cc_library(
     hdrs = [
         "camera.hpp",
     ],
-    copts = ["-fopenmp"],
-    linkopts = ["-fopenmp"],
     visibility = ["//src:__subpackages__"],
     deps = [
         "//src/lib/math",

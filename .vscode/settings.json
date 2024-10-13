@@ -81,6 +81,8 @@
     "numbers": "cpp",
     "ranges": "cpp",
     "semaphore": "cpp",
-    "condition_variable": "cpp"
-  }
+    "condition_variable": "cpp",
+    "codecvt": "cpp"
+  },
+  "cmake.ignoreCMakeListsMissing": true
 }

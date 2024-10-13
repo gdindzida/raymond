@@ -4,33 +4,12 @@
 
 namespace image {
 
-void Camera::render(const world::Hittable& world) {
-    initialize();
-
-    std::cout << "P3\n" << image_width << ' ' << image_height_ << "\n255\n";
-
-    OMP_PARALLEL_FOR_DYNAMIC
-    for (int j = 0; j < image_height_; ++j) {
-        std::clog << "\rScanlines remaining: " << (image_height_ - j) << ' ' << std::flush;
-        for (int i = 0; i < image_width; ++i) {
-            color pixel_color(F_ZERO, F_ZERO, F_ZERO);
-            for (int sample = 0; sample < samples_per_pixel; ++sample) {
-                Ray r = get_ray(i, j);
-                pixel_color += ray_color(r, max_depth, world);
-            }
-            // write_color(std::cout, pixel_samples_scale_ * pixel_color);
-        }
-    }
-
-    std::clog << "\rDone.               \n";
-}
-
 void Camera::initialize() {
     // Image
     image_height_ = int(image_width / aspect_ratio);
     image_height_ = (image_height_ < 1) ? 1 : image_height_;
 
-    pixel_samples_scale_ = 1.0 / samples_per_pixel;
+    pixel_samples_scale_ = F_ONE / samples_per_pixel;
 
     // Camera
     auto theta = degrees_to_radians(vfov);
@@ -62,6 +41,35 @@ void Camera::initialize() {
     defocus_disk_v_ = v_ * defocus_radius;
 }
 
+void Camera::render(const world::Hittable& world) {
+    initialize();
+
+    std::cout << "P3\n" << image_width << ' ' << image_height_ << "\n255\n";
+
+    OMP_PARALLEL_FOR_DYNAMIC
+    for (int j = 0; j < image_height_; ++j) {
+        std::clog << "\rScanlines remaining: " << (image_height_ - j) << ' ' << std::flush;
+        for (int i = 0; i < image_width; ++i) {
+            color pixel_color(F_ZERO, F_ZERO, F_ZERO);
+            for (int sample = 0; sample < samples_per_pixel; ++sample) {
+                Ray r = get_ray(i, j);
+                pixel_color += ray_color(r, max_depth, world);
+            }
+            // write_color(std::cout, pixel_samples_scale_ * pixel_color);
+        }
+    }
+
+    std::clog << "\rDone.               \n";
+}
+
+image::color Camera::pixel_color(uint32_t u, uint32_t v, const world::Hittable* world) const {
+    Ray r = get_ray(u, v);
+    return ray_color(r, max_depth, *world);
+}
+
+int Camera::get_image_width() const { return image_width; }
+int Camera::get_image_height() const { return image_height_; }
+
 Ray Camera::get_ray(int i, int j) const {
     auto offset = sample_square();
     auto pixel_sample =
@@ -83,7 +91,7 @@ Camera::point3 Camera::defocus_disk_sample() const {
     return camera_center_ + (p[0] * defocus_disk_u_) + (p[1] * defocus_disk_v_);
 }
 
-color Camera::ray_color(const Ray& r, int depth, const world::Hittable& world) {
+color Camera::ray_color(const Ray& r, int depth, const world::Hittable& world) const {
     if (depth <= 0) return C_BLACK;
 
     world::HitRecord record{};

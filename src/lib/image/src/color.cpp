@@ -9,7 +9,7 @@ inline fp linear_to_gamma(fp linear_component) {
     return 0;
 }
 
-void write_color(std::ostream& out, const color& pixel_color) {
+color8_t get_scaled_color(color pixel_color) {
     auto r = pixel_color.x();
     auto g = pixel_color.y();
     auto b = pixel_color.z();
@@ -20,11 +20,18 @@ void write_color(std::ostream& out, const color& pixel_color) {
 
     static const geometry::Interval intesity(F_ZERO, F_ONE - F_EPS);
 
-    int rbyte = int(256 * intesity.clamp(r));
-    int gbyte = int(256 * intesity.clamp(g));
-    int bbyte = int(256 * intesity.clamp(b));
+    uint8_t rbyte = uint8_t(256 * intesity.clamp(r));
+    uint8_t gbyte = uint8_t(256 * intesity.clamp(g));
+    uint8_t bbyte = uint8_t(256 * intesity.clamp(b));
 
-    out << rbyte << ' ' << gbyte << ' ' << bbyte << '\n';
+    return color8_t(rbyte, gbyte, bbyte);
+}
+
+void write_color(std::ostream& out, const color& pixel_color) {
+    auto scaled_pixel_color = get_scaled_color(pixel_color);
+
+    out << scaled_pixel_color.x() << ' ' << scaled_pixel_color.y() << ' ' << scaled_pixel_color.z()
+        << '\n';
 }
 
 }  // namespace image

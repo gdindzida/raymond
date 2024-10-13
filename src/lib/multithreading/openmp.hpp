@@ -8,7 +8,7 @@
 
 #define OMP_FOR _Pragma("omp for")
 
-#define OMP_PARALLEL_FOR_DYNAMIC _Pragma("omp parallel for num_threads(6) schedule(dynamic, 1)")
+#define OMP_PARALLEL_FOR_DYNAMIC _Pragma("omp parallel for num_threads(6) schedule(dynamic, 20)")
 
 #else
 

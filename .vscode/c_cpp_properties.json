@@ -4,8 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/bazel-abacus/external/gtest/googletest/include",
-                "${workspaceFolder}"
+                "${workspaceFolder}",
+                "/usr/include/SDL2"
             ],
             "defines": [],
             "compilerPath": "C:/Program Files (x86)/Microsoft Visual Studio/2019/Community/VC/Tools/MSVC/14.29.30133/bin/Hostx64/x64/cl.exe",

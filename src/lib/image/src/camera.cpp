@@ -6,49 +6,49 @@ namespace image {
 
 void Camera::initialize() {
     // Image
-    image_height_ = int(image_width / aspect_ratio);
-    image_height_ = (image_height_ < 1) ? 1 : image_height_;
+    m_image_height = int(image_width / aspect_ratio);
+    m_image_height = (m_image_height < 1) ? 1 : m_image_height;
 
-    pixel_samples_scale_ = F_ONE / samples_per_pixel;
+    m_pixel_samples_scale = F_ONE / samples_per_pixel;
 
     // Camera
     auto theta = degrees_to_radians(vfov);
     auto h = std::tan(theta / F_TWO);
     auto viewport_height = F_TWO * h * focus_dist;
-    auto viewport_width = viewport_height * (double(image_width) / image_height_);
-    camera_center_ = lookFrom;
+    auto viewport_width = viewport_height * (double(image_width) / m_image_height);
+    m_camera_center = lookFrom;
 
     // Calculate u, v, w
-    w_ = geometry::unit_vector(lookFrom - lookAt);
-    u_ = geometry::unit_vector(geometry::cross(vup, w_));
-    v_ = geometry::cross(w_, u_);
+    m_w = geometry::unit_vector(lookFrom - lookAt);
+    m_u = geometry::unit_vector(geometry::cross(vup, m_w));
+    m_v = geometry::cross(m_w, m_u);
 
     // Viewport edges vectors
-    auto viewport_u = viewport_width * u_;
-    auto viewport_v = viewport_height * (-v_);
+    auto viewport_u = viewport_width * m_u;
+    auto viewport_v = viewport_height * (-m_v);
 
     // Viewport delta vectors
-    pixel_delta_u_ = viewport_u / double(image_width);
-    pixel_delta_v_ = viewport_v / double(image_height_);
+    m_pixel_delta_u = viewport_u / double(image_width);
+    m_pixel_delta_v = viewport_v / double(m_image_height);
 
     // Location of upper left pixel
     auto viewport_upper_left =
-        camera_center_ - (focus_dist * w_) - (viewport_u / F_TWO) - (viewport_v / F_TWO);
-    pixel00_loc_ = viewport_upper_left + F_HALF * (pixel_delta_u_ + pixel_delta_v_);
+        m_camera_center - (focus_dist * m_w) - (viewport_u / F_TWO) - (viewport_v / F_TWO);
+    m_pixel00_loc = viewport_upper_left + F_HALF * (m_pixel_delta_u + m_pixel_delta_v);
 
     auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / F_TWO));
-    defocus_disk_u_ = u_ * defocus_radius;
-    defocus_disk_v_ = v_ * defocus_radius;
+    m_defocus_disk_u = m_u * defocus_radius;
+    m_defocus_disk_v = m_v * defocus_radius;
 }
 
 void Camera::render(const world::Hittable& world) {
     initialize();
 
-    std::cout << "P3\n" << image_width << ' ' << image_height_ << "\n255\n";
+    std::cout << "P3\n" << image_width << ' ' << m_image_height << "\n255\n";
 
     OMP_PARALLEL_FOR_DYNAMIC
-    for (int j = 0; j < image_height_; ++j) {
-        std::clog << "\rScanlines remaining: " << (image_height_ - j) << ' ' << std::flush;
+    for (int j = 0; j < m_image_height; ++j) {
+        std::clog << "\rScanlines remaining: " << (m_image_height - j) << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
             color pixel_color(F_ZERO, F_ZERO, F_ZERO);
             for (int sample = 0; sample < samples_per_pixel; ++sample) {
@@ -68,14 +68,14 @@ image::color Camera::pixel_color(uint32_t u, uint32_t v, const world::Hittable* 
 }
 
 int Camera::get_image_width() const { return image_width; }
-int Camera::get_image_height() const { return image_height_; }
+int Camera::get_image_height() const { return m_image_height; }
 
 Ray Camera::get_ray(int i, int j) const {
     auto offset = sample_square();
     auto pixel_sample =
-        pixel00_loc_ + ((i + offset.x()) * pixel_delta_u_) + ((j + offset.y()) * pixel_delta_v_);
+        m_pixel00_loc + ((i + offset.x()) * m_pixel_delta_u) + ((j + offset.y()) * m_pixel_delta_v);
 
-    auto ray_origin = (defocus_angle <= 0) ? camera_center_ : defocus_disk_sample();
+    auto ray_origin = (defocus_angle <= 0) ? m_camera_center : defocus_disk_sample();
     auto ray_direction = pixel_sample - ray_origin;
     auto ray_time = random_number();
 
@@ -88,7 +88,7 @@ Camera::vec3 Camera::sample_square() const {
 
 Camera::point3 Camera::defocus_disk_sample() const {
     auto p = geometry::random_vec3_in_unit_disk();
-    return camera_center_ + (p[0] * defocus_disk_u_) + (p[1] * defocus_disk_v_);
+    return m_camera_center + (p[0] * m_defocus_disk_u) + (p[1] * m_defocus_disk_v);
 }
 
 color Camera::ray_color(const Ray& r, int depth, const world::Hittable& world) const {

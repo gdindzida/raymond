@@ -33,7 +33,7 @@ class AABB {
     std::string to_string() const noexcept;
 
    private:
-    std::array<geometry::Interval, 3> intervals_;
+    std::array<geometry::Interval, 3> m_intervals;
 };
 
 }  // namespace world

@@ -26,9 +26,9 @@ class Ray {
     fp time() const noexcept;
 
    private:
-    point3 o_;
-    vec3 dir_;
-    fp time_;
+    point3 m_o;
+    vec3 m_dir;
+    fp m_time;
 };
 
 }  // namespace image

@@ -35,7 +35,7 @@ class Lambertian : public Material {
                  Ray& scattered) const override;
 
    private:
-    std::shared_ptr<Texture> texture_;
+    std::shared_ptr<Texture> m_texture;
 };
 
 class Metal : public Material {
@@ -50,8 +50,8 @@ class Metal : public Material {
                  Ray& scattered) const override;
 
    private:
-    color albedo_;
-    fp fuzz_;
+    color m_albedo;
+    fp m_fuzz;
 };
 
 class Dielectric : public Material {
@@ -65,7 +65,7 @@ class Dielectric : public Material {
                  Ray& scattered) const override;
 
    private:
-    fp eta_;
+    fp m_eta;
 
     fp reflectance(fp cosine, fp refraction_index) const;
 };

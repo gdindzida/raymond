@@ -3,24 +3,24 @@
 namespace image {
 
 Ray::Ray(const point3& origin, const vec3& direction)
-    : o_(origin), dir_(direction), time_(F_ZERO) {}
+    : m_o(origin), m_dir(direction), m_time(F_ZERO) {}
 
 Ray::Ray(const point3& origin, const vec3& direction, const fp time)
-    : o_(origin), dir_(direction), time_(time) {}
+    : m_o(origin), m_dir(direction), m_time(time) {}
 
 Ray& Ray::operator=(const Ray& other) {
-    o_ = other.origin();
-    dir_ = other.direction();
+    m_o = other.origin();
+    m_dir = other.direction();
 
     return *this;
 }
 
-const Ray::point3& Ray::origin() const noexcept { return o_; }
+const Ray::point3& Ray::origin() const noexcept { return m_o; }
 
-const Ray::vec3& Ray::direction() const noexcept { return dir_; }
+const Ray::vec3& Ray::direction() const noexcept { return m_dir; }
 
-Ray::point3 Ray::at(fp t) const noexcept { return o_ + t * dir_; }
+Ray::point3 Ray::at(fp t) const noexcept { return m_o + t * m_dir; }
 
-fp Ray::time() const noexcept { return time_; }
+fp Ray::time() const noexcept { return m_time; }
 
 }  // namespace image

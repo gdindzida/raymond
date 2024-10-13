@@ -27,7 +27,7 @@ class SolidColor : public Texture {
     image::color value(const fp u, const fp v, const geometry::point3& p) const override;
 
    private:
-    image::color albedo_;
+    image::color m_albedo;
 };
 
 class CheckerTexture : public Texture {
@@ -42,9 +42,9 @@ class CheckerTexture : public Texture {
     image::color value(const fp u, const fp v, const geometry::point3& p) const override;
 
    private:
-    fp inv_scale_;
-    std::shared_ptr<Texture> even_;
-    std::shared_ptr<Texture> odd_;
+    fp m_inv_scale;
+    std::shared_ptr<Texture> m_even;
+    std::shared_ptr<Texture> m_odd;
 };
 
 }  // namespace world

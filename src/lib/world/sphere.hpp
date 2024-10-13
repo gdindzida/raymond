@@ -28,10 +28,10 @@ class Sphere : public Hittable {
     const AABB& bounding_box() const noexcept override;
 
    private:
-    image::Ray center_;
-    fp radius_;
-    std::shared_ptr<Material> material_;
-    AABB bbox_;
+    image::Ray m_center;
+    fp m_radius;
+    std::shared_ptr<Material> m_material;
+    AABB m_bbox;
 };
 
 }  // namespace world

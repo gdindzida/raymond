@@ -29,8 +29,8 @@ class Interval {
     static const Interval empty, universe;
 
    private:
-    fp min_;
-    fp max_;
+    fp m_min;
+    fp m_max;
 };
 
 }  // namespace geometry

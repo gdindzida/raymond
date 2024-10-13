@@ -24,9 +24,9 @@ class BVHNode : public Hittable {
                            BVHNode* const nodes, const size_t& number_of_nodes);
 
    private:
-    Hittable* left_;
-    Hittable* right_;
-    AABB bbox_;
+    Hittable* m_left;
+    Hittable* m_right;
+    AABB m_bbox;
 
     struct BVHBuildTask {
         size_t start_index;

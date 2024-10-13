@@ -6,25 +6,25 @@ const AABB AABB::empty = AABB(Interval::empty, Interval::empty, Interval::empty)
 const AABB AABB::universe = AABB(Interval::universe, Interval::universe, Interval::universe);
 
 AABB::AABB(const point3& a, const point3& b) {
-    intervals_[0] = (a[0] < b[0]) ? Interval(a[0], b[0]) : Interval(b[0], a[0]);
-    intervals_[1] = (a[1] < b[1]) ? Interval(a[1], b[1]) : Interval(b[1], a[1]);
-    intervals_[2] = (a[2] < b[2]) ? Interval(a[2], b[2]) : Interval(b[2], a[2]);
+    m_intervals[0] = (a[0] < b[0]) ? Interval(a[0], b[0]) : Interval(b[0], a[0]);
+    m_intervals[1] = (a[1] < b[1]) ? Interval(a[1], b[1]) : Interval(b[1], a[1]);
+    m_intervals[2] = (a[2] < b[2]) ? Interval(a[2], b[2]) : Interval(b[2], a[2]);
 }
 
 AABB::AABB(const AABB& a, const AABB& b) {
-    intervals_[0] = Interval(a[0], b[0]);
-    intervals_[1] = Interval(a[1], b[1]);
-    intervals_[2] = Interval(a[2], b[2]);
+    m_intervals[0] = Interval(a[0], b[0]);
+    m_intervals[1] = Interval(a[1], b[1]);
+    m_intervals[2] = Interval(a[2], b[2]);
 }
 
 AABB::AABB(const Interval& x, const Interval& y, const Interval& z) {
-    intervals_[0] = x;
-    intervals_[1] = y;
-    intervals_[2] = z;
+    m_intervals[0] = x;
+    m_intervals[1] = y;
+    m_intervals[2] = z;
 }
 
 const geometry::Interval& AABB::operator[](const int32_t& index) const noexcept {
-    return intervals_[index];
+    return m_intervals[index];
 }
 
 bool AABB::hit(const image::Ray r, const Interval& ray_t) const noexcept {
@@ -34,7 +34,7 @@ bool AABB::hit(const image::Ray r, const Interval& ray_t) const noexcept {
     Interval temp = ray_t;
 
     for (int axis = 0; axis < 3; ++axis) {
-        const Interval& ax = intervals_[axis];
+        const Interval& ax = m_intervals[axis];
         const fp adinv = F_ONE / ray_direction[axis];
 
         auto t0 = (ax.min() - ray_origin[axis]) * adinv;
@@ -55,20 +55,20 @@ bool AABB::hit(const image::Ray r, const Interval& ray_t) const noexcept {
 }
 
 int32_t AABB::longest_axis() const noexcept {
-    if (intervals_[0].size() > intervals_[1].size()) {
-        return intervals_[0].size() > intervals_[2].size() ? 0 : 2;
+    if (m_intervals[0].size() > m_intervals[1].size()) {
+        return m_intervals[0].size() > m_intervals[2].size() ? 0 : 2;
     } else {
-        return intervals_[1].size() > intervals_[2].size() ? 1 : 2;
+        return m_intervals[1].size() > m_intervals[2].size() ? 1 : 2;
     }
 }
 
 std::string AABB::to_string() const noexcept {
     std::string output = "";
-    output += "(" + std::to_string(intervals_[0].min()) + "," +
-              std::to_string(intervals_[0].max()) + " )" + " (" +
-              std::to_string(intervals_[1].min()) + "," + std::to_string(intervals_[1].max()) +
-              " )" + " (" + std::to_string(intervals_[2].min()) + "," +
-              std::to_string(intervals_[2].max()) + " )";
+    output += "(" + std::to_string(m_intervals[0].min()) + "," +
+              std::to_string(m_intervals[0].max()) + " )" + " (" +
+              std::to_string(m_intervals[1].min()) + "," + std::to_string(m_intervals[1].max()) +
+              " )" + " (" + std::to_string(m_intervals[2].min()) + "," +
+              std::to_string(m_intervals[2].max()) + " )";
     return output;
 }
 

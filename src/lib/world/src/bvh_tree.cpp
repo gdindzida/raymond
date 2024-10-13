@@ -6,16 +6,16 @@
 namespace world {
 
 bool BVHNode::hit(const image::Ray& r, const geometry::Interval& t, HitRecord& record) const {
-    if (!bbox_.hit(r, t)) return false;
+    if (!m_bbox.hit(r, t)) return false;
 
-    bool hit_left = left_->hit(r, t, record);
+    bool hit_left = m_left->hit(r, t, record);
     bool hit_right =
-        right_->hit(r, geometry::Interval(t.min(), hit_left ? record.t : t.max()), record);
+        m_right->hit(r, geometry::Interval(t.min(), hit_left ? record.t : t.max()), record);
 
     return hit_left || hit_right;
 }
 
-const AABB& BVHNode::bounding_box() const noexcept { return bbox_; }
+const AABB& BVHNode::bounding_box() const noexcept { return m_bbox; }
 
 void BVHNode::build_tree(Sphere* const spheres, const size_t& number_of_objects,
                          BVHNode* const nodes, const size_t& number_of_nodes) {
@@ -35,13 +35,13 @@ void BVHNode::build_tree(Sphere* const spheres, const size_t& number_of_objects,
         auto end = current_task.end_index;
         auto node_index = current_task.node_index;
 
-        nodes[node_index].bbox_ = spheres[start].bounding_box();
+        nodes[node_index].m_bbox = spheres[start].bounding_box();
         for (size_t object_index = start; object_index < current_task.end_index; ++object_index) {
-            nodes[node_index].bbox_ =
-                AABB(nodes[node_index].bbox_, spheres[object_index].bounding_box());
+            nodes[node_index].m_bbox =
+                AABB(nodes[node_index].m_bbox, spheres[object_index].bounding_box());
         }
 
-        int32_t axis = nodes[node_index].bbox_.longest_axis();
+        int32_t axis = nodes[node_index].m_bbox.longest_axis();
 
         auto comparator = box_x_compare;
         if (axis == 1) {
@@ -52,11 +52,11 @@ void BVHNode::build_tree(Sphere* const spheres, const size_t& number_of_objects,
 
         size_t object_span = current_task.end_index - start;
         if (object_span == 1) {
-            nodes[node_index].left_ = static_cast<Hittable*>(&spheres[start]);
-            nodes[node_index].right_ = static_cast<Hittable*>(&spheres[start]);
+            nodes[node_index].m_left = static_cast<Hittable*>(&spheres[start]);
+            nodes[node_index].m_right = static_cast<Hittable*>(&spheres[start]);
         } else if (object_span == 2) {
-            nodes[node_index].left_ = static_cast<Hittable*>(&spheres[start]);
-            nodes[node_index].right_ = static_cast<Hittable*>(&spheres[start + 1]);
+            nodes[node_index].m_left = static_cast<Hittable*>(&spheres[start]);
+            nodes[node_index].m_right = static_cast<Hittable*>(&spheres[start + 1]);
         } else {
             std::sort(spheres + start, spheres + end, comparator);
 
@@ -71,8 +71,8 @@ void BVHNode::build_tree(Sphere* const spheres, const size_t& number_of_objects,
             task_queue.push(BVHBuildTask{start, mid, left_node_index});
             task_queue.push(BVHBuildTask{mid, end, right_node_index});
 
-            nodes[node_index].left_ = static_cast<Hittable*>(&nodes[left_node_index]);
-            nodes[node_index].right_ = static_cast<Hittable*>(&nodes[right_node_index]);
+            nodes[node_index].m_left = static_cast<Hittable*>(&nodes[left_node_index]);
+            nodes[node_index].m_right = static_cast<Hittable*>(&nodes[right_node_index]);
         }
     }
 }

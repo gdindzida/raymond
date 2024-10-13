@@ -25,10 +25,10 @@ class WindowRenderer : public Renderer {
     void render(const image::Camera& camera, const world::Hittable* world) override;
 
    private:
-    SDL_Window* window_;
-    SDL_Renderer* renderer_;
-    SDL_Texture* texture_;
-    int width_, height_;
+    SDL_Window* m_window;
+    SDL_Renderer* m_renderer;
+    SDL_Texture* m_texture;
+    int m_width, m_height;
 };
 
 }  // namespace gui

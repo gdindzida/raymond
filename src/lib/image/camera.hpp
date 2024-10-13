@@ -39,15 +39,15 @@ class Camera {
     int get_image_height() const;
 
    private:
-    int image_height_;
-    fp pixel_samples_scale_;
-    point3 camera_center_;
-    point3 pixel00_loc_;
-    vec3 pixel_delta_u_;
-    vec3 pixel_delta_v_;
-    vec3 u_, v_, w_;
-    vec3 defocus_disk_u_;
-    vec3 defocus_disk_v_;
+    int m_image_height;
+    fp m_pixel_samples_scale;
+    point3 m_camera_center;
+    point3 m_pixel00_loc;
+    vec3 m_pixel_delta_u;
+    vec3 m_pixel_delta_v;
+    vec3 m_u, m_v, m_w;
+    vec3 m_defocus_disk_u;
+    vec3 m_defocus_disk_v;
 
     Ray get_ray(int i, int j) const;
 

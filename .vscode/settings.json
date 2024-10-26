@@ -82,7 +82,14 @@
     "ranges": "cpp",
     "semaphore": "cpp",
     "condition_variable": "cpp",
-    "codecvt": "cpp"
+    "codecvt": "cpp",
+    "cassert": "cpp",
+    "cerrno": "cpp",
+    "cfloat": "cpp",
+    "climits": "cpp",
+    "filesystem": "cpp",
+    "queue": "cpp",
+    "cstdbool": "cpp"
   },
   "cmake.ignoreCMakeListsMissing": true
 }

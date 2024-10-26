@@ -46,14 +46,20 @@ int main(int argc, char* argv[]) {
             auto choose_material = random_number();
             point3 center(a + 0.9 * random_number(), 0.2, b + 0.9 * random_number());
 
-            if ((center - point3(4, 0.2, 0)).length() > 0.9) {
+            vec3 spawn_vector{};
+            vec3_sub(center, point3(4, 0.2, 0), spawn_vector);
+            if (spawn_vector.length() > 0.9) {
                 std::shared_ptr<world::Material> sphere_material;
 
                 if (choose_material < 0.8) {
                     // diffuse
-                    auto albedo = geometry::random_vec3() * geometry::random_vec3();
+                    vec3 albedo{};
+                    vec3_elementwise_mul(geometry::random_vec3(), geometry::random_vec3(), albedo);
+
                     sphere_material = std::make_shared<world::Lambertian>(albedo);
-                    auto center2 = center + vec3(0, random_number(0, 0.5), 0);
+
+                    vec3 center2{};
+                    vec3_add(center, vec3(0, random_number(0, 0.5), 0), center2);
                     add_sphere(world::Sphere(center, center2, 0.2, sphere_material), world,
                                number_of_spheres);
                 } else if (choose_material < 0.95) {

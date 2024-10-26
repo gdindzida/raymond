@@ -19,52 +19,49 @@ void Camera::initialize() {
     m_camera_center = lookFrom;
 
     // Calculate u, v, w
-    m_w = geometry::unit_vector(lookFrom - lookAt);
-    m_u = geometry::unit_vector(geometry::cross(vup, m_w));
-    m_v = geometry::cross(m_w, m_u);
+    vec3_sub(lookFrom, lookAt, m_w);
+    vec3_unit(m_w, m_w);
+    vec3_cross_product(vup, m_w, m_u);
+    vec3_unit(m_u, m_u);
+    vec3_cross_product(m_w, m_u, m_v);
 
     // Viewport edges vectors
-    auto viewport_u = viewport_width * m_u;
-    auto viewport_v = viewport_height * (-m_v);
+    vec3 viewport_u{};
+    vec3_scalar_mul(viewport_width, m_u, viewport_u);
+    vec3 viewport_v{};
+    vec3_scalar_mul(F_NEG_ONE * viewport_height, m_v, viewport_v);
 
     // Viewport delta vectors
-    m_pixel_delta_u = viewport_u / double(image_width);
-    m_pixel_delta_v = viewport_v / double(m_image_height);
+    vec3_scalar_mul(F_ONE / double(image_width), viewport_u, m_pixel_delta_u);
+    vec3_scalar_mul(F_ONE / double(m_image_height), viewport_v, m_pixel_delta_v);
 
     // Location of upper left pixel
-    auto viewport_upper_left =
-        m_camera_center - (focus_dist * m_w) - (viewport_u / F_TWO) - (viewport_v / F_TWO);
-    m_pixel00_loc = viewport_upper_left + F_HALF * (m_pixel_delta_u + m_pixel_delta_v);
+    vec3 viewport_u_delta{};
+    vec3_scalar_mul(F_NEG_ONE * F_HALF, viewport_u, viewport_u_delta);
+
+    vec3 viewport_v_delta{};
+    vec3_scalar_mul(F_NEG_ONE * F_HALF, viewport_v, viewport_v_delta);
+
+    vec3 viewport_w_delta{};
+    vec3_scalar_mul(F_NEG_ONE * focus_dist, m_w, viewport_w_delta);
+
+    vec3 viewport_upper_left = m_camera_center;
+    viewport_upper_left += viewport_u_delta;
+    viewport_upper_left += viewport_v_delta;
+    viewport_upper_left += viewport_w_delta;
+
+    vec3_add(m_pixel_delta_u, m_pixel_delta_v, m_pixel00_loc);
+    m_pixel00_loc *= F_HALF;
+    m_pixel00_loc += viewport_upper_left;
 
     auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / F_TWO));
-    m_defocus_disk_u = m_u * defocus_radius;
-    m_defocus_disk_v = m_v * defocus_radius;
-}
-
-void Camera::render(const world::Hittable& world) {
-    initialize();
-
-    std::cout << "P3\n" << image_width << ' ' << m_image_height << "\n255\n";
-
-    OMP_PARALLEL_FOR_DYNAMIC
-    for (int j = 0; j < m_image_height; ++j) {
-        std::clog << "\rScanlines remaining: " << (m_image_height - j) << ' ' << std::flush;
-        for (int i = 0; i < image_width; ++i) {
-            color pixel_color(F_ZERO, F_ZERO, F_ZERO);
-            for (int sample = 0; sample < samples_per_pixel; ++sample) {
-                Ray r = get_ray(i, j);
-                pixel_color += ray_color(r, max_depth, world);
-            }
-            // write_color(std::cout, pixel_samples_scale_ * pixel_color);
-        }
-    }
-
-    std::clog << "\rDone.               \n";
+    vec3_scalar_mul(defocus_radius, m_u, m_defocus_disk_u);
+    vec3_scalar_mul(defocus_radius, m_v, m_defocus_disk_v);
 }
 
 image::color Camera::pixel_color(uint32_t u, uint32_t v, const world::Hittable* world) const {
-    Ray r = get_ray(u, v);
-    return ray_color(r, max_depth, *world);
+    Ray r = get_ray(u, v);                   // MEM: Needs 3 x vec3
+    return ray_color(r, max_depth, *world);  // MEM: Needs 3 x vec3 + record
 }
 
 int Camera::get_image_width() const { return image_width; }
@@ -72,11 +69,17 @@ int Camera::get_image_height() const { return m_image_height; }
 
 Ray Camera::get_ray(int i, int j) const {
     auto offset = sample_square();
-    auto pixel_sample =
-        m_pixel00_loc + ((i + offset.x()) * m_pixel_delta_u) + ((j + offset.y()) * m_pixel_delta_v);
+    vec3 delta_u{};  // TODO: optimize memory
+    vec3_scalar_mul(i + offset.x(), m_pixel_delta_u, delta_u);
+    vec3 delta_v{};  // TODO: ooptimize memory
+    vec3_scalar_mul(j + offset.y(), m_pixel_delta_v, delta_v);
+    auto pixel_sample = m_pixel00_loc;  // TODO: optimize memory
+    pixel_sample += delta_u;
+    pixel_sample += delta_v;
 
     auto ray_origin = (defocus_angle <= 0) ? m_camera_center : defocus_disk_sample();
-    auto ray_direction = pixel_sample - ray_origin;
+    vec3 ray_direction{};  // TODO: optimize memory
+    vec3_sub(pixel_sample, ray_origin, ray_direction);
     auto ray_time = random_number();
 
     return Ray(ray_origin, ray_direction, ray_time);
@@ -88,25 +91,46 @@ Camera::vec3 Camera::sample_square() const {
 
 Camera::point3 Camera::defocus_disk_sample() const {
     auto p = geometry::random_vec3_in_unit_disk();
-    return m_camera_center + (p[0] * m_defocus_disk_u) + (p[1] * m_defocus_disk_v);
+    vec3 delta_u{};  // TODO: optimize memory
+    vec3_scalar_mul(p[0], m_defocus_disk_u, delta_u);
+    vec3 delta_v{};  // TODO: ooptimize memory
+    vec3_scalar_mul(p[1], m_defocus_disk_v, delta_v);
+    auto result = m_camera_center;  // TODO: optimize memory
+    result += delta_u;
+    result += delta_v;
+
+    return result;
 }
 
 color Camera::ray_color(const Ray& r, int depth, const world::Hittable& world) const {
     if (depth <= 0) return C_BLACK;
 
-    world::HitRecord record{};
+    color result_color{};  // TODO: optimize memory with record
+
+    world::HitRecord record{};  // TODO: optimize by allocating only one record per ray??
     if (world.hit(r, geometry::Interval(F_EPS, F_INF), record)) {
         Ray scattered;
         color attenuation;
         if (record.material->scatter(r, record, attenuation, scattered)) {
-            return attenuation * ray_color(scattered, depth - 1, world);
+            vec3_elementwise_mul(
+                attenuation,
+                ray_color(scattered, depth - 1, world),  // TODO: Should ray_color return a copy???
+                result_color);
+            return result_color;
         }
         return C_BLACK;
     }
 
-    vec3 unit_direction = geometry::unit_vector(r.direction());
+    vec3 unit_direction{};  // TODO: optimize memory
+    vec3_unit(r.direction(), unit_direction);
     auto a = F_HALF * (unit_direction.y() + F_ONE);
-    return (F_ONE - a) * C_WHITE + a * C_BLUE_SKY;
+
+    vec3_scalar_mul(F_ONE - a, C_WHITE, result_color);
+    color temp{};  // TODO: optimize memory
+    vec3_scalar_mul(a, C_BLUE_SKY, temp);
+    result_color += temp;
+
+    return result_color;
 }
 
 }  // namespace image

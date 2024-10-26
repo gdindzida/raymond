@@ -10,6 +10,7 @@ void ImageRenderer::render(const image::Camera& camera, const world::Hittable* w
 
     std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
+    image::color result_color{};
     for (int j = 0; j < image_height; ++j) {
         std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
         for (int i = 0; i < image_width; ++i) {
@@ -17,7 +18,8 @@ void ImageRenderer::render(const image::Camera& camera, const world::Hittable* w
             for (int sample = 0; sample < samples_per_pixel; ++sample) {
                 pixel_color += camera.pixel_color(i, j, world);
             }
-            image::write_color(std::cout, (F_ONE / samples_per_pixel) * pixel_color);
+            vec3_scalar_mul(F_ONE / samples_per_pixel, pixel_color, result_color);
+            image::write_color(std::cout, result_color);
         }
     }
 

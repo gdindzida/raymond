@@ -31,8 +31,6 @@ class Camera {
 
     void initialize();
 
-    void render(const world::Hittable& world);
-
     image::color pixel_color(uint32_t u, uint32_t v, const world::Hittable* world) const;
 
     int get_image_width() const;

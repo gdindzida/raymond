@@ -24,8 +24,9 @@ struct HitRecord {
     bool front_face;
 
     void set_face_normal(const image::Ray& r, const vec3& outward_normal) {
-        front_face = geometry::dot(r.direction(), outward_normal) < F_ZERO;
-        normal = front_face ? outward_normal : -outward_normal;
+        front_face = geometry::vec3_dot(r.direction(), outward_normal) < F_ZERO;
+        normal = outward_normal;
+        if (!front_face) normal *= F_NEG_ONE;
     }
 };
 

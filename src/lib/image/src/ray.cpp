@@ -19,7 +19,12 @@ const Ray::point3& Ray::origin() const noexcept { return m_o; }
 
 const Ray::vec3& Ray::direction() const noexcept { return m_dir; }
 
-Ray::point3 Ray::at(fp t) const noexcept { return m_o + t * m_dir; }
+Ray::point3 Ray::at(fp t) const noexcept {
+    vec3 temp;
+    geometry::vec3_scalar_mul(t, m_dir, temp);
+    temp += m_o;
+    return temp;
+}
 
 fp Ray::time() const noexcept { return m_time; }
 

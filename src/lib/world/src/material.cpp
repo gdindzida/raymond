@@ -8,7 +8,8 @@ Lambertian::Lambertian(std::shared_ptr<Texture> texture) : m_texture(texture) {}
 
 bool Lambertian::scatter(const Ray& r_in, const HitRecord& record, color& attenuation,
                          Ray& scattered) const {
-    auto scatter_direction = record.normal + geometry::random_unit_vec3();
+    geometry::vec3 scatter_direction{};  // TODO: optimize memory with record
+    geometry::vec3_add(record.normal, geometry::random_unit_vec3(), scatter_direction);
 
     if (scatter_direction.near_zero()) scatter_direction = record.normal;
 
@@ -22,11 +23,17 @@ Metal::Metal(const color& albedo, fp fuzz)
 
 bool Metal::scatter(const Ray& r_in, const HitRecord& record, color& attenuation,
                     Ray& scattered) const {
-    geometry::vec3 reflected = geometry::reflect(r_in.direction(), record.normal);
-    reflected = geometry::unit_vector(reflected) + (m_fuzz * geometry::random_unit_vec3());
+    geometry::vec3 reflected{};  // TODO: optimize memory with record
+    vec3_reflect(r_in.direction(), record.normal, reflected);
+    vec3_unit(reflected, reflected);  // TODO: fix duplication
+
+    geometry::vec3 random_vec{};  // TODO: optimize memory with record
+    vec3_scalar_mul(m_fuzz, geometry::random_unit_vec3(), random_vec);
+
+    reflected += random_vec;
     scattered = Ray(record.p, reflected, r_in.time());
     attenuation = m_albedo;
-    return geometry::dot(scattered.direction(), record.normal) > 0;
+    return vec3_dot(scattered.direction(), record.normal) > 0;
 }
 
 Dielectric::Dielectric(fp refraction_index) : m_eta(refraction_index) {};
@@ -36,16 +43,18 @@ bool Dielectric::scatter(const Ray& r_in, const HitRecord& record, color& attenu
     attenuation = image::C_WHITE;
     fp ri = record.front_face ? (F_ONE / m_eta) : m_eta;
 
-    geometry::vec3 unit_direction = geometry::unit_vector(r_in.direction());
-    fp cos_theta = std::fmin(dot(-unit_direction, record.normal), F_ONE);
+    geometry::vec3 unit_direction{};  // TODO: optimize memory with record
+    geometry::vec3_unit(r_in.direction(), unit_direction);
+
+    fp cos_theta = std::fmin(vec3_dot(-unit_direction, record.normal), F_ONE);
     fp sin_theta = std::sqrt(F_ONE - cos_theta * cos_theta);
 
     bool cannot_refract = ri * sin_theta > F_ONE;
-    geometry::vec3 direction;
+    geometry::vec3 direction;  // TODO: optimize memory with record
     if (cannot_refract || (reflectance(cos_theta, ri) > random_number())) {
-        direction = geometry::reflect(unit_direction, record.normal);
+        geometry::vec3_reflect(unit_direction, record.normal, direction);
     } else {
-        direction = geometry::refract(unit_direction, record.normal, ri);
+        geometry::vec3_refract(unit_direction, record.normal, ri, direction);
     }
 
     scattered = image::Ray(record.p, direction, r_in.time());

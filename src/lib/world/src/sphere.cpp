@@ -7,25 +7,43 @@ Sphere::Sphere(const geometry::point3& center, fp radius, std::shared_ptr<Materi
       m_radius(std::fmax(F_ZERO, radius)),
       m_material(material) {
     auto rvec = geometry::vec3(radius, radius, radius);
-    m_bbox = AABB(center - rvec, center + rvec);
+    geometry::vec3 lower_corner{};
+    geometry::vec3 upper_corner{};
+    vec3_sub(center, rvec, lower_corner);
+    vec3_add(center, rvec, upper_corner);
+    m_bbox = AABB(lower_corner, upper_corner);
 }
 
 Sphere::Sphere(const geometry::point3& centerStart, const geometry::point3& centerEnd, fp radius,
-               std::shared_ptr<Material> material)
-    : m_center(centerStart, centerEnd - centerStart),
-      m_radius(std::fmax(F_ZERO, radius)),
-      m_material(material) {
+               std::shared_ptr<Material> material) {
+    geometry::vec3 direction{};
+    vec3_sub(centerEnd, centerStart, direction);  // TODO: fix naming
+    m_center = image::Ray(centerStart, direction);
+    m_radius = std::fmax(F_ZERO, radius);
+    m_material = material;
+
     auto rvec = geometry::vec3(radius, radius, radius);
-    AABB box1(m_center.at(F_ZERO) - rvec, m_center.at(F_ZERO) + rvec);
-    AABB box2(m_center.at(F_ONE) - rvec, m_center.at(F_ONE) + rvec);
+    geometry::vec3 lower_corner{};
+    geometry::vec3 upper_corner{};
+
+    vec3_sub(m_center.at(F_ZERO), rvec, lower_corner);
+    vec3_add(m_center.at(F_ZERO), rvec, upper_corner);
+    AABB box1(lower_corner, upper_corner);  // TODO: fix box naming
+
+    vec3_sub(m_center.at(F_ONE), rvec, lower_corner);
+    vec3_add(m_center.at(F_ONE), rvec, upper_corner);
+    AABB box2(lower_corner, upper_corner);
+
     m_bbox = AABB(box1, box2);
 }
 
 bool Sphere::hit(const image::Ray& r, const geometry::Interval& t, HitRecord& record) const {
-    const geometry::point3 current_center = m_center.at(r.time());
-    geometry::vec3 oc = current_center - r.origin();
+    geometry::point3 current_center{};  // TODO: optimize memory with record.
+    current_center = m_center.at(r.time());
+    geometry::vec3 oc{};  // TODO: optimize memory with record.
+    vec3_sub(current_center, r.origin(), oc);
     auto a = r.direction().length2();
-    auto h = dot(r.direction(), oc);
+    auto h = vec3_dot(r.direction(), oc);
     auto c = oc.length2() - m_radius * m_radius;
     auto discriminant = h * h - a * c;
 
@@ -44,7 +62,10 @@ bool Sphere::hit(const image::Ray& r, const geometry::Interval& t, HitRecord& re
 
     record.t = root;
     record.p = r.at(root);
-    auto outward_normal = (record.p - current_center) / m_radius;
+
+    geometry::vec3 outward_normal{};  // TODO: optimize memory with record.
+    vec3_sub(record.p, current_center, outward_normal);
+    outward_normal *= (1 / m_radius);
     record.set_face_normal(r, outward_normal);
     record.material = m_material;
 

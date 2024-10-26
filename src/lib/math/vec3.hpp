@@ -34,7 +34,7 @@ class Vec3 {
 
     T& operator[](int i) { return e_[i]; }
 
-    Vec3<T> operator-() const noexcept { return Vec3<T>(-e_[0], -e_[1], -e_[2]); }
+    Vec3<T> operator-() const noexcept { return Vec3<T>(-e_[0], -e_[1], -e_[2]); }  // TODO:optimize
 
     Vec3<T>& operator+=(const Vec3<T>& v) noexcept {
         e_[0] += v.x();

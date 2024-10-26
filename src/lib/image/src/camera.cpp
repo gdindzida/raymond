@@ -60,8 +60,10 @@ void Camera::initialize() {
 }
 
 image::color Camera::pixel_color(uint32_t u, uint32_t v, const world::Hittable* world) const {
-    Ray r = get_ray(u, v);                   // MEM: Needs 3 x vec3
-    return ray_color(r, max_depth, *world);  // MEM: Needs 3 x vec3 + record
+    world::HitRecord record{};  // TODO: optimize by allocating only one record per ray??
+    Ray r = get_ray(u, v);      // MEM: Needs 3 x vec3
+    ray_color(r, max_depth, *world, record);  // MEM: Needs 3 x vec3 + record
+    return record.result_color;
 }
 
 int Camera::get_image_width() const { return image_width; }
@@ -102,35 +104,33 @@ Camera::point3 Camera::defocus_disk_sample() const {
     return result;
 }
 
-color Camera::ray_color(const Ray& r, int depth, const world::Hittable& world) const {
-    if (depth <= 0) return C_BLACK;
+void Camera::ray_color(const Ray& r, int depth, const world::Hittable& world,
+                       world::HitRecord& ray_record) const {
+    if (depth <= 0) {
+        ray_record.result_color = C_BLACK;
+        return;
+    }
 
-    color result_color{};  // TODO: optimize memory with record
-
-    world::HitRecord record{};  // TODO: optimize by allocating only one record per ray??
-    if (world.hit(r, geometry::Interval(F_EPS, F_INF), record)) {
+    if (world.hit(r, geometry::Interval(F_EPS, F_INF), ray_record)) {
         Ray scattered;
         color attenuation;
-        if (record.material->scatter(r, record, attenuation, scattered)) {
-            vec3_elementwise_mul(
-                attenuation,
-                ray_color(scattered, depth - 1, world),  // TODO: Should ray_color return a copy???
-                result_color);
-            return result_color;
+        if (ray_record.material->scatter(r, ray_record, attenuation, scattered)) {
+            ray_color(scattered, depth - 1, world, ray_record);
+            vec3_elementwise_mul(attenuation, ray_record.result_color, ray_record.result_color);
+            return;
         }
-        return C_BLACK;
+        ray_record.result_color = C_BLACK;
+        return;
     }
 
     vec3 unit_direction{};  // TODO: optimize memory
     vec3_unit(r.direction(), unit_direction);
     auto a = F_HALF * (unit_direction.y() + F_ONE);
 
-    vec3_scalar_mul(F_ONE - a, C_WHITE, result_color);
+    vec3_scalar_mul(F_ONE - a, C_WHITE, ray_record.result_color);
     color temp{};  // TODO: optimize memory
     vec3_scalar_mul(a, C_BLUE_SKY, temp);
-    result_color += temp;
-
-    return result_color;
+    ray_record.result_color += temp;
 }
 
 }  // namespace image

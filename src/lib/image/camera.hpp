@@ -53,7 +53,8 @@ class Camera {
 
     point3 defocus_disk_sample() const;
 
-    color ray_color(const Ray& r, int depth, const world::Hittable& world) const;
+    void ray_color(const Ray& r, int depth, const world::Hittable& world,
+                   world::HitRecord& ray_record) const;
 };
 
 }  // namespace image

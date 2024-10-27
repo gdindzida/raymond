@@ -3,6 +3,12 @@ raytracer in a weekend*
 
 What next?
 
+Implement benchmark
+
+Profile each commit in optimization branch
+
+Resolve false sharing
+
 Random generation optimized, memory moved to static except materials & textures. What next to optimize? Move also materials & 
 textures to static memory?
 

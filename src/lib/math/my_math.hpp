@@ -3,6 +3,8 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <memory>
+#include <random>
 
 namespace my_math {
 
@@ -21,7 +23,28 @@ constexpr fp F_EPS_2 = static_cast<fp>(1e-8);
 
 inline fp degrees_to_radians(fp degrees) { return degrees * F_PI / F_180; }
 
-inline fp random_number() { return std::rand() / (RAND_MAX + F_ONE); }
+class RandomGenerator {
+   public:
+    // Delete copy constructor and assignment operator to enforce singleton
+    RandomGenerator(const RandomGenerator&) = delete;
+    RandomGenerator& operator=(const RandomGenerator&) = delete;
+
+    // Accessor for the singleton instance
+    static RandomGenerator& getInstance() {
+        static RandomGenerator instance;  // Guaranteed to be initialized only once
+        return instance;
+    }
+
+    fp generate() { return distribution(generator); }
+
+   private:
+    RandomGenerator() : generator(std::random_device{}()), distribution(F_ZERO, F_ONE) {}
+
+    std::mt19937 generator;
+    std::uniform_real_distribution<double> distribution;
+};
+
+inline fp random_number() { return RandomGenerator::getInstance().generate(); }
 
 inline fp random_number(fp min, fp max) { return min + (max - min) * random_number(); }
 

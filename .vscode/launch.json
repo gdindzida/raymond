@@ -5,7 +5,7 @@
       "name": "Debug",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/bazel-bin/src/app/image_app/raymond5",
+      "program": "${workspaceFolder}/bazel-bin/src/app/gui_app/debra",
       "args": [],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}",

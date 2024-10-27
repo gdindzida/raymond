@@ -23,10 +23,10 @@ struct HitRecord {
     fp u;
     fp v;
     bool front_face;
-    // Global memory
+    // Global ray memory
     image::color result_color;
     // Global helper memory
-    vec3 memory[3];
+    vec3 memory[6];
 
     void set_face_normal(const image::Ray& r, const vec3& outward_normal) {
         front_face = geometry::vec3_dot(r.direction(), outward_normal) < F_ZERO;

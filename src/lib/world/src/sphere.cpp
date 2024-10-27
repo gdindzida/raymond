@@ -38,9 +38,9 @@ Sphere::Sphere(const geometry::point3& centerStart, const geometry::point3& cent
 }
 
 bool Sphere::hit(const image::Ray& r, const geometry::Interval& t, HitRecord& record) const {
-    geometry::point3 current_center{};  // TODO: optimize memory with record.
+    geometry::point3& current_center = record.memory[0];
     current_center = m_center.at(r.time());
-    geometry::vec3 oc{};  // TODO: optimize memory with record.
+    geometry::vec3& oc = record.memory[1];
     vec3_sub(current_center, r.origin(), oc);
     auto a = r.direction().length2();
     auto h = vec3_dot(r.direction(), oc);
@@ -63,7 +63,7 @@ bool Sphere::hit(const image::Ray& r, const geometry::Interval& t, HitRecord& re
     record.t = root;
     record.p = r.at(root);
 
-    geometry::vec3 outward_normal{};  // TODO: optimize memory with record.
+    geometry::vec3& outward_normal = record.memory[2];
     vec3_sub(record.p, current_center, outward_normal);
     outward_normal *= (1 / m_radius);
     record.set_face_normal(r, outward_normal);

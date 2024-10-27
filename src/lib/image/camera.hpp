@@ -1,6 +1,8 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
+#include <vector>
+
 #include "src/lib/image/color.hpp"
 #include "src/lib/image/ray.hpp"
 #include "src/lib/math/my_math.hpp"
@@ -46,12 +48,11 @@ class Camera {
     vec3 m_u, m_v, m_w;
     vec3 m_defocus_disk_u;
     vec3 m_defocus_disk_v;
+    mutable std::vector<world::HitRecord> ray_records;
 
     Ray get_ray(int i, int j, world::HitRecord& ray_record) const;
 
-    vec3 sample_square() const;
-
-    point3 defocus_disk_sample() const;
+    void defocus_disk_sample(world::HitRecord& ray_record, point3& result) const;
 
     void ray_color(const Ray& r, int depth, const world::Hittable& world,
                    world::HitRecord& ray_record) const;

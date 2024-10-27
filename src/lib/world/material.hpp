@@ -18,7 +18,7 @@ class Material {
    public:
     virtual ~Material() = default;
 
-    virtual bool scatter(const Ray& r_in, const HitRecord& record, color& attenuation,
+    virtual bool scatter(const Ray& r_in, HitRecord& record, color& attenuation,
                          Ray& scattered) const = 0;
 };
 
@@ -31,7 +31,7 @@ class Lambertian : public Material {
     Lambertian(Lambertian&& other) noexcept = default;
     ~Lambertian() = default;
 
-    bool scatter(const Ray& r_in, const HitRecord& record, color& attenuation,
+    bool scatter(const Ray& r_in, HitRecord& record, color& attenuation,
                  Ray& scattered) const override;
 
    private:
@@ -46,7 +46,7 @@ class Metal : public Material {
     Metal(Metal&& other) noexcept = default;
     ~Metal() = default;
 
-    bool scatter(const Ray& r_in, const HitRecord& record, color& attenuation,
+    bool scatter(const Ray& r_in, HitRecord& record, color& attenuation,
                  Ray& scattered) const override;
 
    private:
@@ -61,7 +61,7 @@ class Dielectric : public Material {
     Dielectric(const Dielectric& other) = default;
     Dielectric(Dielectric&& other) noexcept = default;
 
-    bool scatter(const Ray& r_in, const HitRecord& record, color& attenuation,
+    bool scatter(const Ray& r_in, HitRecord& record, color& attenuation,
                  Ray& scattered) const override;
 
    private:

@@ -4,6 +4,12 @@
 
 namespace image {
 
+namespace {
+inline Camera::vec3 sample_square() {
+    return Camera::vec3(random_number() - F_HALF, random_number() - F_HALF, F_ZERO);
+}
+}  // namespace
+
 void Camera::initialize() {
     // Image
     m_image_height = int(image_width / aspect_ratio);
@@ -54,15 +60,20 @@ void Camera::initialize() {
     m_pixel00_loc *= F_HALF;
     m_pixel00_loc += viewport_upper_left;
 
+    // Defocus blur
     auto defocus_radius = focus_dist * std::tan(degrees_to_radians(defocus_angle / F_TWO));
     vec3_scalar_mul(defocus_radius, m_u, m_defocus_disk_u);
     vec3_scalar_mul(defocus_radius, m_v, m_defocus_disk_v);
+
+    // Memory allocation
+    ray_records.reserve(get_image_height() * get_image_width());
+    ray_records.resize(get_image_height() * get_image_width());
 }
 
 image::color Camera::pixel_color(uint32_t u, uint32_t v, const world::Hittable* world) const {
-    world::HitRecord record{};      // TODO: optimize by allocating only one record per ray??
-    Ray r = get_ray(u, v, record);  // MEM: Needs 3 x vec3
-    ray_color(r, max_depth, *world, record);  // MEM: Needs 3 x vec3 + record
+    world::HitRecord& record = ray_records[v * get_image_width() + u];
+    Ray r = get_ray(u, v, record);
+    ray_color(r, max_depth, *world, record);
     return record.result_color;
 }
 
@@ -72,18 +83,20 @@ int Camera::get_image_height() const { return m_image_height; }
 Ray Camera::get_ray(int i, int j, world::HitRecord& ray_record) const {
     vec3& pixel_sample = ray_record.memory[0];
     {
-        auto offset = sample_square();
-        vec3& delta_u = ray_record.memory[1];
+        vec3& offset = ray_record.memory[1];
+        offset = sample_square();
+        vec3& delta_u = ray_record.memory[2];
         vec3_scalar_mul(i + offset.x(), m_pixel_delta_u, delta_u);
-        vec3& delta_v = ray_record.memory[2];
+        vec3& delta_v = ray_record.memory[3];
         vec3_scalar_mul(j + offset.y(), m_pixel_delta_v, delta_v);
         pixel_sample = m_pixel00_loc;
         pixel_sample += delta_u;
         pixel_sample += delta_v;
     }
 
-    vec3& ray_origin = ray_record.memory[1];
-    ray_origin = (defocus_angle <= 0) ? m_camera_center : defocus_disk_sample();
+    point3& ray_origin = ray_record.memory[1];
+    ray_origin = m_camera_center;
+    if (defocus_angle > 0) defocus_disk_sample(ray_record, ray_origin);
     vec3& ray_direction = ray_record.memory[2];
     vec3_sub(pixel_sample, ray_origin, ray_direction);
     auto ray_time = random_number();
@@ -91,21 +104,16 @@ Ray Camera::get_ray(int i, int j, world::HitRecord& ray_record) const {
     return Ray(ray_origin, ray_direction, ray_time);
 }
 
-Camera::vec3 Camera::sample_square() const {
-    return vec3(random_number() - F_HALF, random_number() - F_HALF, F_ZERO);
-}
-
-Camera::point3 Camera::defocus_disk_sample() const {
-    auto p = geometry::random_vec3_in_unit_disk();
-    vec3 delta_u{};  // TODO: optimize memory
+void Camera::defocus_disk_sample(world::HitRecord& ray_record, point3& result) const {
+    vec3 delta_u = ray_record.memory[3];
+    vec3 delta_v = ray_record.memory[4];
+    vec3 p = ray_record.memory[5];
+    geometry::random_vec3_in_unit_disk(p);
     vec3_scalar_mul(p[0], m_defocus_disk_u, delta_u);
-    vec3 delta_v{};  // TODO: ooptimize memory
     vec3_scalar_mul(p[1], m_defocus_disk_v, delta_v);
-    auto result = m_camera_center;  // TODO: optimize memory
+    result = m_camera_center;
     result += delta_u;
     result += delta_v;
-
-    return result;
 }
 
 void Camera::ray_color(const Ray& r, int depth, const world::Hittable& world,

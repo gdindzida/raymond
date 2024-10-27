@@ -66,12 +66,12 @@ void Camera::initialize() {
     vec3_scalar_mul(defocus_radius, m_v, m_defocus_disk_v);
 
     // Memory allocation
-    ray_records.reserve(get_image_height() * get_image_width());
-    ray_records.resize(get_image_height() * get_image_width());
+    ray_records.reserve(get_image_height());
+    ray_records.resize(get_image_height());
 }
 
 image::color Camera::pixel_color(uint32_t u, uint32_t v, const world::Hittable* world) const {
-    world::HitRecord& record = ray_records[v * get_image_width() + u];
+    world::HitRecord& record = ray_records[v];
     Ray r = get_ray(u, v, record);
     ray_color(r, max_depth, *world, record);
     return record.result_color;

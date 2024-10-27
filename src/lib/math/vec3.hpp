@@ -66,7 +66,7 @@ class Vec3 {
     }
 
    private:
-    std::array<T, 3> m_e{};
+    T m_e[3];
 };
 
 }  // namespace geometry

@@ -47,7 +47,7 @@ class Camera {
     vec3 m_defocus_disk_u;
     vec3 m_defocus_disk_v;
 
-    Ray get_ray(int i, int j) const;
+    Ray get_ray(int i, int j, world::HitRecord& ray_record) const;
 
     vec3 sample_square() const;
 
